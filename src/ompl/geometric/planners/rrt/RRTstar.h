@@ -320,6 +320,18 @@ namespace ompl
                 return numSampleAttempts_;
             }
 
+            /** \brief Set the max number of iterations*/
+            void setMaxIters(unsigned int maxIters)
+            {
+                maxIters_ = maxIters;
+            }
+ 
+            /** \brief Get the max number of iterations*/
+            unsigned int getMaxIters() const
+            {
+                return maxIters_;
+            }
+
             unsigned int numIterations() const
             {
                 return iterations_;
@@ -513,6 +525,9 @@ namespace ompl
 
             /** \brief Number of iterations the algorithm performed */
             unsigned int iterations_{0u};
+
+            /** \brief The max number of the iterations. */
+            unsigned int maxIters_{1u};
 
             ///////////////////////////////////////
             // Planner progress property functions

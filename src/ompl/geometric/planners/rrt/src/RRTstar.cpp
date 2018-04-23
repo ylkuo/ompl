@@ -81,6 +81,8 @@ ompl::geometric::RRTstar::RRTstar(const base::SpaceInformationPtr &si)
     Planner::declareParam<bool>("focus_search", this, &RRTstar::setFocusSearch, &RRTstar::getFocusSearch, "0,1");
     Planner::declareParam<unsigned int>("number_sampling_attempts", this, &RRTstar::setNumSamplingAttempts,
                                         &RRTstar::getNumSamplingAttempts, "10:10:100000");
+    Planner::declareParam<unsigned int>("max_iters", this, &RRTstar::setMaxIters, &RRTstar::getMaxIters,
+                                        "10:10:100000");
 
     addPlannerProgressProperty("iterations INTEGER", [this] { return numIterationsProperty(); });
     addPlannerProgressProperty("best cost REAL", [this] { return bestCostProperty(); });
@@ -244,7 +246,7 @@ ompl::base::PlannerStatus ompl::geometric::RRTstar::solve(const base::PlannerTer
     // our functor for sorting nearest neighbors
     CostIndexCompare compareFn(costs, *opt_);
 
-    while (ptc == false)
+    while (ptc == false && iterations_ < maxIters_)
     {
         iterations_++;
 
