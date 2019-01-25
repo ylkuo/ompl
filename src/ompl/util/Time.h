@@ -42,29 +42,16 @@
 #include <iomanip>
 #include <sstream>
 
-// std::put_time is not implemented in GCC 4.x
-#if defined(__GNUC__) && (__GNUC__ < 5)
-namespace std
-{
-    inline std::string put_time(const std::tm *tmb, const char *fmt)
-    {
-        char mbstr[100];
-        std::strftime(mbstr, sizeof(mbstr), fmt, tmb);
-        return string(mbstr);
-    }
-}
-#endif
-
 namespace ompl
 {
     /** \brief Namespace containing time datatypes and time operations */
     namespace time
     {
         /** \brief Representation of a point in time */
-        typedef std::chrono::system_clock::time_point point;
+        using point = std::chrono::system_clock::time_point;
 
         /** \brief Representation of a time duration */
-        typedef std::chrono::system_clock::duration duration;
+        using duration = std::chrono::system_clock::duration;
 
         /** \brief Get the current time point */
         inline point now()

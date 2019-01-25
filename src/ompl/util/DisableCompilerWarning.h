@@ -1,7 +1,7 @@
 /*********************************************************************
 * Software License Agreement (BSD License)
 *
-*  Copyright (c) 2010, Rice University.
+*  Copyright (c) 2018, Rice University
 *  All rights reserved.
 *
 *  Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,34 @@
 
 /* Author: Mark Moll */
 
-#ifndef OMPL_TEST_RESOURCES_CONFIG_
-#define OMPL_TEST_RESOURCES_CONFIG_
+#ifndef OMPL_UTIL_DISABLE_COMPILER_WARNING_
+#define OMPL_UTIL_DISABLE_COMPILER_WARNING_
 
-#define TEST_RESOURCES_DIR "@TEST_RESOURCES_DIR@"
+#define OMPL_PRAGMA_HELPER0(x) #x
+#define OMPL_PRAGMA_HELPER1(x, y) OMPL_PRAGMA_HELPER0(x diagnostic ignored y)
+
+// do nothing
+#define OMPL_PUSH_DISABLE_GCC_WARNING(warning)
+#define OMPL_POP_GCC
+#define OMPL_PUSH_DISABLE_CLANG_WARNING(warning)
+#define OMPL_POP_CLANG
+
+#if defined(__clang__)
+    #undef OMPL_PUSH_DISABLE_CLANG_WARNING
+    #undef OMPL_POP_CLANG
+    #define OMPL_PUSH_DISABLE_CLANG_WARNING(warning) \
+        _Pragma("clang diagnostic push") \
+        _Pragma(OMPL_PRAGMA_HELPER1(clang, OMPL_PRAGMA_HELPER0(warning)))
+    #define OMPL_POP_CLANG \
+        _Pragma("GCC diagnostic pop")
+#elif defined __GNUC__
+    #undef OMPL_PUSH_DISABLE_GCC_WARNING
+    #undef OMPL_POP_GCC
+    #define OMPL_PUSH_DISABLE_GCC_WARNING(warning) \
+        _Pragma("GCC diagnostic push") \
+        _Pragma(OMPL_PRAGMA_HELPER1(GCC, OMPL_PRAGMA_HELPER0(warning)))
+    #define OMPL_POP_GCC \
+        _Pragma("GCC diagnostic pop")
+#endif
+
 #endif

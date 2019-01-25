@@ -108,7 +108,8 @@ void ompl::geometric::SST::clear()
         nn_->clear();
     if (witnesses_)
         witnesses_->clear();
-    prevSolutionCost_ = opt_->infiniteCost();
+    if (opt_)
+        prevSolutionCost_ = opt_->infiniteCost();
 }
 
 void ompl::geometric::SST::freeMemory()
@@ -209,6 +210,7 @@ ompl::base::State *ompl::geometric::SST::monteCarloProp(Motion *m)
     // take a step of length step towards the random state
     double d = si_->distance(m->state_, xstate);
     si_->getStateSpace()->interpolate(m->state_, xstate, step / d, xstate);
+    si_->enforceBounds(xstate);
 
     return xstate;
 }
@@ -348,12 +350,14 @@ ompl::base::PlannerStatus ompl::geometric::SST::solve(const base::PlannerTermina
 
                 if (oldRep != rmotion)
                 {
-                    oldRep->inactive_ = true;
-                    nn_->remove(oldRep);
                     while (oldRep->inactive_ && oldRep->numChildren_ == 0)
                     {
+                        oldRep->inactive_ = true;
+                        nn_->remove(oldRep);
+
                         if (oldRep->state_)
                             si_->freeState(oldRep->state_);
+
                         oldRep->state_ = nullptr;
                         oldRep->parent_->numChildren_--;
                         Motion *oldRepParent = oldRep->parent_;
@@ -392,7 +396,7 @@ ompl::base::PlannerStatus ompl::geometric::SST::solve(const base::PlannerTermina
 
     OMPL_INFORM("%s: Created %u states in %u iterations", getName().c_str(), nn_->size(), iterations);
 
-    return base::PlannerStatus(solved, approximate);
+    return {solved, approximate};
 }
 
 void ompl::geometric::SST::getPlannerData(base::PlannerData &data) const

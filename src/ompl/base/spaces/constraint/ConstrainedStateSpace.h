@@ -44,7 +44,7 @@
 #include "ompl/base/spaces/WrapperStateSpace.h"
 #include "ompl/base/SpaceInformation.h"
 
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 namespace ompl
 {
@@ -219,6 +219,13 @@ namespace ompl
             /** \brief Perform both constrained and regular sanity checks. */
             void sanityChecks() const override;
 
+            /** \brief Return the valid segment count on the manifold, as valid
+             * segment count is determined by \e delta_ and \e lambda_. */
+            unsigned int validSegmentCount(const State* s1, const State* s2) const override
+            {
+                return distance(s1, s2) * (1. / delta_) * lambda_;
+            }
+
             /** @} */
 
             /** @name Constrained Planning
@@ -257,7 +264,7 @@ namespace ompl
             /** \brief Set \a delta, the step size for traversing the manifold
              * and collision checking. Default defined by
              * ompl::magic::CONSTRAINED_STATE_SPACE_DELTA. */
-            void setDelta(const double delta);
+            void setDelta(double delta);
 
             /** \brief Set \a lambda, where lambda * distance(x, y) is the
              * maximum length of the geodesic x to y. Additionally, lambda *

@@ -52,7 +52,7 @@ if (NOT PYTHON_EXEC)
         DOC "Location of python executable to use")
 endif(NOT PYTHON_EXEC)
 
-# On OS X the python executable might be symlinked to the "real" location
+# On macOS the python executable might be symlinked to the "real" location
 # of the python executable. The header files and libraries are found relative
 # to that path.
 # For CMake 2.6 and below, the REALPATH option is included in the ABSOLUTE option
@@ -95,9 +95,8 @@ find_path(PYTHON_INCLUDE_DIRS "Python.h"
 
 execute_process(COMMAND "${PYTHON_EXEC}" "-c"
     "from distutils.sysconfig import get_python_lib; print(get_python_lib())"
-    OUTPUT_VARIABLE PYTHON_SITE_MODULES_
+    OUTPUT_VARIABLE PYTHON_SITE_MODULES
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-string(REGEX REPLACE "^${PYTHON_PREFIX2}/" "" PYTHON_SITE_MODULES "${PYTHON_SITE_MODULES_}")
 
 function(find_python_module module)
     string(TOUPPER ${module} module_upper)
@@ -105,15 +104,15 @@ function(find_python_module module)
     if(ARGC GREATER 2)
         set(_minversion ${ARGV1})
         if (ARGV2 STREQUAL "REQUIRED")
-            set(PY_${module}_FIND_REQUIRED TRUE)
+            set(PY_${module}_FIND_REQUIRED ON)
         elseif (ARGV2 STREQUAL "QUIET")
-            set(PY_${module}_FIND_QUIETLY TRUE)
+            set(PY_${module}_FIND_QUIETLY ON)
         endif()
     elseif (ARGC GREATER 1)
         if (ARGV1 STREQUAL "REQUIRED")
-            set(PY_${module}_FIND_REQUIRED TRUE)
+            set(PY_${module}_FIND_REQUIRED ON)
         elseif (ARGV1 STREQUAL "QUIET")
-            set(PY_${module}_FIND_QUIETLY TRUE)
+            set(PY_${module}_FIND_QUIETLY ON)
         else()
             set(_minversion ${ARGV1})
         endif()
@@ -159,6 +158,11 @@ function(find_python_module module)
         endif (_minversion STREQUAL "")
     endif(PYTHON_EXEC AND NOT PY_${module_upper})
     find_package_handle_standard_args(PY_${module} DEFAULT_MSG PY_${module_upper})
+    if(PY_${module_upper})
+        set_property(GLOBAL APPEND PROPERTY PY_MODULES_FOUND "${module}")
+    else()
+        set_property(GLOBAL APPEND PROPERTY PY_MODULES_NOTFOUND "${module}")
+    endif()
 endfunction(find_python_module)
 
 # macro to attempt to find the *correct* Boost.Python library (i.e., the

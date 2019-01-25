@@ -232,7 +232,7 @@ ompl::base::PlannerStatus ompl::geometric::RRTstar::solve(const base::PlannerTer
 
     if (bestGoalMotion_)
         OMPL_INFORM("%s: Starting planning with existing solution of cost %.5f", getName().c_str(),
-                    bestCost_);
+                    bestCost_.value());
 
     if (useKNearest_)
         OMPL_INFORM("%s: Initial k-nearest value of %u", getName().c_str(),
@@ -481,7 +481,7 @@ ompl::base::PlannerStatus ompl::geometric::RRTstar::solve(const base::PlannerTer
 
                     OMPL_INFORM("%s: Found an initial solution with a cost of %.2f in %u iterations (%u "
                                 "vertices in the graph)",
-                                getName().c_str(), bestCost_, iterations_, nn_->size());
+                                getName().c_str(), bestCost_.value(), iterations_, nn_->size());
                 }
                 else
                 {
@@ -599,7 +599,7 @@ ompl::base::PlannerStatus ompl::geometric::RRTstar::solve(const base::PlannerTer
                 getName().c_str(), statesGenerated, rewireTest, goalMotions_.size(), bestCost_.value());
 
     // We've added a solution if newSolution == true, and it is an approximate solution if bestGoalMotion_ == false
-    return base::PlannerStatus(newSolution != nullptr, bestGoalMotion_ == nullptr);
+    return {newSolution != nullptr, bestGoalMotion_ == nullptr};
 }
 
 void ompl::geometric::RRTstar::getNeighbors(Motion *motion, std::vector<Motion *> &nbh) const
@@ -850,12 +850,9 @@ int ompl::geometric::RRTstar::pruneTree(const base::Cost &pruneTreeCost)
 
         // Now finally add back any vertices left in chainsToReheck.
         // These are chain vertices that have descendents that we want to keep
-        for (std::list<Motion *>::const_iterator mIter = chainsToRecheck.begin(); mIter != chainsToRecheck.end();
-             ++mIter)
-        {
+        for (const auto &r : chainsToRecheck)
             // Add the motion back to the NN struct:
-            nn_->add(*mIter);
-        }
+            nn_->add(r);
 
         // All done pruning.
         // Update the cost at which we've pruned:
